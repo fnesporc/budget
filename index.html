@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<meta name="theme-color" content="#fafaf8">
+<title>Budget</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+<style>
+:root{
+  --bg:#fafaf8;--bg2:#f3f2ef;--bg3:#eeedea;
+  --tx:#1a1a19;--tx2:#7a7974;--tx3:#a5a49e;
+  --bd:#e3e2dd;--bd2:#d0cfca;
+  --grn:#3B6D11;--grn-l:#EAF3DE;--grn-d:#27500A;
+  --red:#993C1D;--red-l:#FAECE7;--red-d:#712B13;
+  --pur:#534AB7;--pur-l:#EEEDFE;--pur-d:#3C3489;
+  --blu:#185FA5;--blu-l:#E6F1FB;--blu-d:#0C447C;
+  --dot-in:#97C459;--dot-out:#F0997B;--dot-inv:#AFA9EC;--dot-bp:#85B7EB;
+  --r:10px;--rs:8px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a19;--bg2:#252524;--bg3:#2f2f2d;
+    --tx:#e8e7e3;--tx2:#8a8983;--tx3:#5f5e5a;
+    --bd:#333331;--bd2:#444441;
+    --grn:#97C459;--grn-l:#173404;--grn-d:#C0DD97;
+    --red:#F0997B;--red-l:#4A1B0C;--red-d:#F5C4B3;
+    --pur:#AFA9EC;--pur-l:#26215C;--pur-d:#CECBF6;
+    --blu:#85B7EB;--blu-l:#042C53;--blu-d:#B5D4F4;
+    --dot-in:#97C459;--dot-out:#F0997B;--dot-inv:#AFA9EC;--dot-bp:#85B7EB;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg);color:var(--tx);-webkit-tap-highlight-color:transparent}
+body{padding:env(safe-area-inset-top) 0 0 0}
+.app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+.hdr{padding:1.25rem 1.25rem .75rem;display:flex;align-items:baseline;justify-content:space-between}
+.hdr-t{font-size:16px;font-weight:600;color:var(--tx)}
+.hdr-m{font-size:13px;color:var(--tx3)}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.page{display:none;padding:1rem 1.25rem 2rem}
+.page.on{display:block}
+
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:.5px solid var(--bd);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:10}
+.nav-btn{flex:1;padding:6px 4px;font-size:11px;color:var(--tx3);background:none;border:none;cursor:pointer;border-radius:var(--rs);display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s;-webkit-appearance:none}
+.nav-btn.on{color:var(--tx);background:var(--bg2)}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.saldo-block{padding:1.25rem 0 .75rem;text-align:center}
+.saldo-lbl{font-size:11px;letter-spacing:.06em;color:var(--tx3);margin-bottom:5px}
+.saldo-num{font-size:34px;font-weight:600;letter-spacing:-.02em}
+.saldo-num.pos{color:var(--grn)}.saldo-num.neg{color:var(--red)}
+
+.row2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.75rem}
+.mc{background:var(--bg2);border-radius:var(--rs);padding:.75rem .875rem}
+.mc-l{font-size:11px;color:var(--tx3);margin-bottom:3px}
+.mc-v{font-size:15px;font-weight:600}
+.mc-v.g{color:var(--grn)}.mc-v.r{color:var(--red)}.mc-v.p{color:var(--pur)}.mc-v.b{color:var(--blu)}
+
+.divider{height:.5px;background:var(--bd);margin:.875rem 0}
+.sl{font-size:11px;letter-spacing:.05em;color:var(--tx3);margin-bottom:.5rem}
+
+.tx-list{display:flex;flex-direction:column;gap:5px}
+.tx{display:flex;align-items:center;gap:10px;padding:.625rem .75rem;background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rs)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.in{background:var(--dot-in)}.dot.out{background:var(--dot-out)}.dot.inv{background:var(--dot-inv)}.dot.bp{background:var(--dot-bp)}
+.txb{flex:1;min-width:0}
+.txn{font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txm{font-size:11px;color:var(--tx3)}
+.txa{font-size:13px;font-weight:600}
+.txa.in{color:var(--grn)}.txa.out{color:var(--red)}.txa.inv{color:var(--pur)}.txa.bp{color:var(--blu)}
+.txd{background:none;border:none;color:var(--tx3);cursor:pointer;padding:4px 6px;font-size:18px;line-height:1}
+.empty-msg{text-align:center;padding:2rem 0;font-size:13px;color:var(--tx3)}
+
+.type-row{display:flex;gap:5px;margin-bottom:1.25rem}
+.tp{flex:1;padding:9px 4px;border-radius:20px;border:.5px solid var(--bd2);background:var(--bg);font-size:13px;cursor:pointer;color:var(--tx2);transition:all .15s;text-align:center;font-weight:500;-webkit-appearance:none}
+.tp.sel-out{background:var(--red-l);color:var(--red-d);border-color:var(--dot-out)}
+.tp.sel-in{background:var(--grn-l);color:var(--grn-d);border-color:var(--dot-in)}
+.tp.sel-inv{background:var(--pur-l);color:var(--pur-d);border-color:var(--dot-inv)}
+
+.fl{font-size:12px;color:var(--tx2);display:block;margin-bottom:5px}
+.fg{margin-bottom:.875rem}
+.fg2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+input[type=text],input[type=number],input[type=date],select{width:100%;padding:10px 12px;font-size:15px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--bg);color:var(--tx);-webkit-appearance:none;appearance:none}
+input:focus,select:focus{outline:none;border-color:var(--bd2)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a7974'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+.go-btn{width:100%;padding:12px;background:var(--tx);color:var(--bg);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;margin-top:.25rem;-webkit-appearance:none}
+.go-btn:active{opacity:.85}
+
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bar-lbl{font-size:11px;color:var(--tx2);width:80px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--bg2);border-radius:3px;height:12px}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s;min-width:3px}
+.bar-fill.out{background:var(--dot-out)}.bar-fill.in{background:var(--dot-in)}.bar-fill.inv{background:var(--dot-inv)}
+.bar-num{font-size:11px;font-weight:500;min-width:52px;text-align:right;color:var(--tx2)}
+
+.bp-top{background:var(--grn-l);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.bp-left .bpl{font-size:11px;color:var(--grn);margin-bottom:3px}
+.bp-left .bpv{font-size:20px;font-weight:600;color:var(--grn-d)}
+.bp-left .bps{font-size:11px;color:var(--grn);margin-top:2px}
+.bp-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.bp-right .bpr-lbl{font-size:11px;color:var(--grn)}
+.bp-right input{width:64px;text-align:center}
+
+.yr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.yr-card{background:var(--bg2);border-radius:var(--rs);padding:.625rem .75rem}
+.yr-l{font-size:11px;color:var(--tx3);margin-bottom:2px}
+.yr-v{font-size:14px;font-weight:600}
+
+.exp-card{background:var(--bg2);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:10px}
+.exp-title{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
+.exp-sub{font-size:11px;color:var(--tx3);margin-bottom:10px}
+.exp-btn{width:100%;padding:10px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;color:var(--tx);-webkit-appearance:none}
+.exp-btn:active{background:var(--bg2)}
+.exp-btn.imp{border-style:dashed}
+.exp-warn{font-size:11px;color:var(--red);text-align:center;padding:1rem 0}
+.exp-ok{font-size:12px;color:var(--grn);text-align:center;padding:.5rem 0}
+.toggle-scope{display:flex;gap:0;margin-bottom:.75rem;border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden}
+.scope-btn{flex:1;padding:8px;font-size:12px;background:var(--bg);border:none;color:var(--tx2);cursor:pointer;font-weight:500;-webkit-appearance:none}
+.scope-btn.on{background:var(--bg2);color:var(--tx)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-t">budget</span>
+    <span class="hdr-m" id="hdr-m"></span>
+  </div>
+
+  <div class="content">
+    <div class="page on" id="pg-home">
+      <div class="saldo-block">
+        <div class="saldo-lbl">saldo del mese</div>
+        <div class="saldo-num pos" id="saldo-v">€0,00</div>
+      </div>
+      <div class="row2">
+        <div class="mc"><div class="mc-l">entrate</div><div class="mc-v g" id="tot-in">€0,00</div></div>
+        <div class="mc"><div class="mc-l">uscite</div><div class="mc-v r" id="tot-out">€0,00</div></div>
+        <div class="mc"><div class="mc-l">investito</div><div class="mc-v p" id="tot-inv">€0,00</div></div>
+        <div class="mc"><div class="mc-l">buoni usati</div><div class="mc-v b" id="tot-bp">0</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sl">recenti</div>
+      <div class="tx-list" id="tx-list"></div>
+    </div>
+
+    <div class="page" id="pg-add">
+      <div class="type-row">
+        <button class="tp sel-out" id="pill-out" onclick="setT('out')">uscita</button>
+        <button class="tp" id="pill-in" onclick="setT('in')">entrata</button>
+        <button class="tp" id="pill-inv" onclick="setT('inv')">investimento</button>
+      </div>
+      <div class="fg"><label class="fl">descrizione</label><input type="text" id="f-desc" placeholder="es. Supermercato"></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">importo (€)</label><input type="number" id="f-amt" placeholder="0,00" min="0" step="0.01"></div>
+        <div class="fg"><label class="fl">data</label><input type="date" id="f-date"></div>
+      </div>
+      <div class="fg"><label class="fl">categoria</label><select id="f-cat"></select></div>
+      <button class="go-btn" onclick="saveTx()">salva</button>
+    </div>
+
+    <div class="page" id="pg-grafici">
+      <div class="toggle-scope">
+        <button class="scope-btn on" id="sc-mese" onclick="setScope('mese')">mese</button>
+        <button class="scope-btn" id="sc-anno" onclick="setScope('anno')">anno</button>
+      </div>
+      <div class="sl">uscite per categoria</div>
+      <div id="ch-out" style="margin-bottom:1rem"></div>
+      <div class="sl">entrate per categoria</div>
+      <div id="ch-in" style="margin-bottom:1rem"></div>
+      <div class="sl">investimenti per categoria</div>
+      <div id="ch-inv" style="margin-bottom:1rem"></div>
+      <div class="sl">andamento 6 mesi</div>
+      <div id="ch-monthly"></div>
+    </div>
+
+    <div class="page" id="pg-anno">
+      <div class="saldo-block">
+        <div class="saldo-lbl" id="yr-lbl">anno 2026</div>
+        <div class="saldo-num pos" id="yr-saldo">€0,00</div>
+      </div>
+      <div class="yr-grid">
+        <div class="yr-card"><div class="yr-l">entrate</div><div class="yr-v g" id="yr-in">€0,00</div></div>
+        <div class="yr-card"><div class="yr-l">uscite</div><div class="yr-v r" id="yr-out">€0,00</div></div>
+        <div class="yr-card"><div class="yr-l">investito</div><div class="yr-v p" id="yr-inv">€0,00</div></div>
+        <div class="yr-card"><div class="yr-l">buoni usati</div><div class="yr-v b" id="yr-bp">0 — €0,00</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sl">riepilogo per mese</div>
+      <div id="yr-months" style="display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+
+    <div class="page" id="pg-pasti">
+      <div class="bp-top">
+        <div class="bp-left">
+          <div class="bpl">buoni usati questo mese</div>
+          <div class="bpv" id="bp-cnt">0 buoni</div>
+          <div class="bps" id="bp-tot-v">€0,00 totale</div>
+        </div>
+        <div class="bp-right">
+          <span class="bpr-lbl">valore (€)</span>
+          <input type="number" id="bp-val" value="7" min="1" step="0.5">
+        </div>
+      </div>
+      <div class="fg"><label class="fl">dove hai usato il buono</label><input type="text" id="bp-desc" placeholder="es. Mensa aziendale"></div>
+      <div class="fg"><label class="fl">data</label><input type="date" id="bp-date"></div>
+      <button class="go-btn" style="background:var(--grn)" onclick="saveBp()">registra buono pasto</button>
+      <div class="divider"></div>
+      <div class="sl">storico</div>
+      <div class="tx-list" id="bp-list"></div>
+    </div>
+
+    <div class="page" id="pg-dati">
+      <div class="sl">esporta dati</div>
+      <div class="exp-card">
+        <div class="exp-title">transazioni</div>
+        <div class="exp-sub" id="exp-tx-count">0 transazioni salvate</div>
+        <button class="exp-btn" onclick="exportCSV('tx')">scarica CSV transazioni</button>
+      </div>
+      <div class="exp-card">
+        <div class="exp-title">buoni pasto</div>
+        <div class="exp-sub" id="exp-bp-count">0 buoni salvati</div>
+        <button class="exp-btn" onclick="exportCSV('bp')">scarica CSV buoni pasto</button>
+      </div>
+      <div class="exp-card">
+        <div class="exp-title">tutto insieme</div>
+        <div class="exp-sub">un unico file con transazioni e buoni</div>
+        <button class="exp-btn" onclick="exportCSV('all')">scarica CSV completo</button>
+      </div>
+      <div class="divider"></div>
+      <div class="sl">importa dati</div>
+      <div class="exp-card">
+        <div class="exp-title">ripristina da CSV</div>
+        <div class="exp-sub">carica un file esportato in precedenza</div>
+        <button class="exp-btn imp" onclick="document.getElementById('imp-file').click()">seleziona file CSV</button>
+        <input type="file" id="imp-file" accept=".csv" style="display:none" onchange="importCSV(this)">
+        <div id="imp-status"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sl">zona pericolosa</div>
+      <div class="exp-card" style="background:var(--red-l)">
+        <div class="exp-title" style="color:var(--red)">cancella tutti i dati</div>
+        <div class="exp-sub">questa azione è irreversibile</div>
+        <button class="exp-btn" style="border-color:var(--red);color:var(--red)" onclick="clearAll()">cancella tutto</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn on" onclick="go('home')" id="nb-home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>home
+    </button>
+    <button class="nav-btn" onclick="go('add')" id="nb-add">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>aggiungi
+    </button>
+    <button class="nav-btn" onclick="go('grafici')" id="nb-grafici">
+      <svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="17" y="4" width="4" height="16" rx="1"/></svg>grafici
+    </button>
+    <button class="nav-btn" onclick="go('anno')" id="nb-anno">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>anno
+    </button>
+    <button class="nav-btn" onclick="go('pasti')" id="nb-pasti">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>buoni
+    </button>
+    <button class="nav-btn" onclick="go('dati')" id="nb-dati">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>dati
+    </button>
+  </div>
+</div>
+
+<script>
+const CATS={
+  out:['Spesa','Ristorante','Trasporti','Salute','Svago','Abbonamenti','Altro'],
+  in:['Stipendio','Freelance','Cedole','Rimborso','Altro'],
+  inv:['Azioni','ETF','PAC','Obbligazioni','Crypto','Cedole ricevute','Altro']
+};
+const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MESI3=MESI.map(m=>m.slice(0,3));
+
+let txType='out',chartScope='mese';
+let txs=JSON.parse(localStorage.getItem('bgt_tx')||'[]');
+let bps=JSON.parse(localStorage.getItem('bgt_bp')||'[]');
+
+const fmt=v=>'€'+parseFloat(v).toFixed(2).replace('.',',');
+const today=()=>new Date().toISOString().split('T')[0];
+const now=new Date();
+const CY=now.getFullYear(),CM=now.getMonth();
+
+document.getElementById('f-date').value=today();
+document.getElementById('bp-date').value=today();
+document.getElementById('hdr-m').textContent=MESI[CM]+' '+CY;
+
+const TABS=['home','add','grafici','anno','pasti','dati'];
+function go(name){
+  TABS.forEach(n=>{
+    document.getElementById('pg-'+n).classList.toggle('on',n===name);
+    document.getElementById('nb-'+n).classList.toggle('on',n===name);
+  });
+  if(name==='home')renderHome();
+  if(name==='grafici')renderCharts();
+  if(name==='anno')renderYear();
+  if(name==='pasti')renderBp();
+  if(name==='dati')renderDati();
+}
+
+function setT(t){
+  txType=t;
+  ['out','in','inv'].forEach(x=>{document.getElementById('pill-'+x).className='tp'+(t===x?' sel-'+x:'');});
+  document.getElementById('f-cat').innerHTML=CATS[t].map(c=>'<option>'+c+'</option>').join('');
+}
+setT('out');
+
+function setScope(s){
+  chartScope=s;
+  document.getElementById('sc-mese').classList.toggle('on',s==='mese');
+  document.getElementById('sc-anno').classList.toggle('on',s==='anno');
+  renderCharts();
+}
+
+function saveTx(){
+  var desc=document.getElementById('f-desc').value.trim();
+  var amt=parseFloat(document.getElementById('f-amt').value);
+  var date=document.getElementById('f-date').value;
+  var cat=document.getElementById('f-cat').value;
+  if(!desc||isNaN(amt)||amt<=0||!date){alert('Compila tutti i campi.');return;}
+  txs.unshift({id:Date.now(),desc:desc,amt:amt,date:date,cat:cat,type:txType});
+  localStorage.setItem('bgt_tx',JSON.stringify(txs));
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-amt').value='';
+  go('home');
+}
+function delTx(id){txs=txs.filter(function(t){return t.id!==id;});localStorage.setItem('bgt_tx',JSON.stringify(txs));renderHome();}
+
+function filterMonth(arr){return arr.filter(function(t){var d=new Date(t.date);return d.getMonth()===CM&&d.getFullYear()===CY;});}
+function filterYear(arr){return arr.filter(function(t){return new Date(t.date).getFullYear()===CY;});}
+
+function renderHome(){
+  var mTx=filterMonth(txs),mBp=filterMonth(bps);
+  var tIn=mTx.filter(function(t){return t.type==='in';}).reduce(function(s,t){return s+t.amt;},0);
+  var tOut=mTx.filter(function(t){return t.type==='out';}).reduce(function(s,t){return s+t.amt;},0);
+  var tInv=mTx.filter(function(t){return t.type==='inv';}).reduce(function(s,t){return s+t.amt;},0);
+  var saldo=tIn-tOut-tInv;
+  document.getElementById('tot-in').textContent=fmt(tIn);
+  document.getElementById('tot-out').textContent=fmt(tOut);
+  document.getElementById('tot-inv').textContent=fmt(tInv);
+  document.getElementById('tot-bp').textContent=mBp.length;
+  var sv=document.getElementById('saldo-v');
+  sv.textContent=fmt(saldo);sv.className='saldo-num '+(saldo>=0?'pos':'neg');
+  var list=document.getElementById('tx-list');
+  var rec=txs.slice(0,12);
+  if(!rec.length){list.innerHTML='<div class="empty-msg">nessuna transazione ancora</div>';return;}
+  list.innerHTML=rec.map(function(t){return '<div class="tx"><span class="dot '+t.type+'"></span><div class="txb"><div class="txn">'+t.desc+'</div><div class="txm">'+t.cat+' · '+t.date+'</div></div><span class="txa '+t.type+'">'+(t.type==='out'?'-':'+')+fmt(t.amt)+'</span><button class="txd" onclick="delTx('+t.id+')" aria-label="Elimina">×</button></div>';}).join('');
+}
+
+function saveBp(){
+  var desc=document.getElementById('bp-desc').value.trim();
+  var date=document.getElementById('bp-date').value;
+  var val=parseFloat(document.getElementById('bp-val').value)||7;
+  if(!desc||!date){alert('Compila tutti i campi.');return;}
+  bps.unshift({id:Date.now(),desc:desc,date:date,val:val});
+  localStorage.setItem('bgt_bp',JSON.stringify(bps));
+  document.getElementById('bp-desc').value='';
+  document.getElementById('bp-date').value=today();
+  renderBp();
+}
+function delBp(id){bps=bps.filter(function(b){return b.id!==id;});localStorage.setItem('bgt_bp',JSON.stringify(bps));renderBp();}
+
+function renderBp(){
+  var mb=filterMonth(bps);
+  var tot=mb.reduce(function(s,b){return s+b.val;},0);
+  document.getElementById('bp-cnt').textContent=mb.length+(mb.length===1?' buono':' buoni');
+  document.getElementById('bp-tot-v').textContent=fmt(tot)+' totale';
+  var list=document.getElementById('bp-list');
+  if(!bps.length){list.innerHTML='<div class="empty-msg">nessun buono registrato</div>';return;}
+  list.innerHTML=bps.map(function(b){return '<div class="tx"><span class="dot bp"></span><div class="txb"><div class="txn">'+b.desc+'</div><div class="txm">'+b.date+'</div></div><span class="txa bp">'+fmt(b.val)+'</span><button class="txd" onclick="delBp('+b.id+')" aria-label="Elimina">×</button></div>';}).join('');
+}
+
+function buildBar(el,type,list){
+  var bycat={};
+  list.filter(function(t){return t.type===type;}).forEach(function(t){bycat[t.cat]=(bycat[t.cat]||0)+t.amt;});
+  var entries=Object.entries(bycat).sort(function(a,b){return b[1]-a[1];});
+  if(!entries.length){el.innerHTML='<div class="empty-msg" style="padding:.5rem 0">nessun dato</div>';return;}
+  var max=entries[0][1];
+  el.innerHTML=entries.map(function(e){var cat=e[0],val=e[1];return '<div class="bar-row"><span class="bar-lbl">'+cat+'</span><div class="bar-track"><div class="bar-fill '+type+'" style="width:'+Math.max(4,Math.round(val/max*100))+'%"></div></div><span class="bar-num">'+fmt(val)+'</span></div>';}).join('');
+}
+
+function renderCharts(){
+  var pool=chartScope==='anno'?filterYear(txs):filterMonth(txs);
+  buildBar(document.getElementById('ch-out'),'out',pool);
+  buildBar(document.getElementById('ch-in'),'in',pool);
+  buildBar(document.getElementById('ch-inv'),'inv',pool);
+  var monthly=document.getElementById('ch-monthly');
+  var last6=[];
+  for(var i=5;i>=0;i--){
+    var d=new Date(CY,CM-i,1);
+    var mm=d.getMonth(),yy=d.getFullYear();
+    var mt=txs.filter(function(t){var td=new Date(t.date);return td.getMonth()===mm&&td.getFullYear()===yy;});
+    last6.push({mn:MESI3[mm>=0?mm:mm+12],out:mt.filter(function(t){return t.type==='out';}).reduce(function(s,t){return s+t.amt;},0),inp:mt.filter(function(t){return t.type==='in';}).reduce(function(s,t){return s+t.amt;},0),inv:mt.filter(function(t){return t.type==='inv';}).reduce(function(s,t){return s+t.amt;},0)});
+  }
+  var maxV=Math.max.apply(null,last6.map(function(x){return Math.max(x.out,x.inp,x.inv);}));
+  if(maxV<1)maxV=1;
+  monthly.innerHTML=last6.map(function(x){return '<div class="bar-row" style="align-items:flex-start"><span class="bar-lbl" style="padding-top:2px">'+x.mn+'</span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div class="bar-track" style="height:9px"><div class="bar-fill in" style="width:'+Math.round(x.inp/maxV*100)+'%"></div></div><div class="bar-track" style="height:9px"><div class="bar-fill out" style="width:'+Math.round(x.out/maxV*100)+'%"></div></div><div class="bar-track" style="height:9px"><div class="bar-fill inv" style="width:'+Math.round(x.inv/maxV*100)+'%"></div></div></div><span class="bar-num">'+fmt(x.inp-x.out-x.inv)+'</span></div>';}).join('');
+}
+
+function renderYear(){
+  var yTx=filterYear(txs),yBp=filterYear(bps);
+  var yIn=yTx.filter(function(t){return t.type==='in';}).reduce(function(s,t){return s+t.amt;},0);
+  var yOut=yTx.filter(function(t){return t.type==='out';}).reduce(function(s,t){return s+t.amt;},0);
+  var yInv=yTx.filter(function(t){return t.type==='inv';}).reduce(function(s,t){return s+t.amt;},0);
+  var ySaldo=yIn-yOut-yInv;
+  var yBpTot=yBp.reduce(function(s,b){return s+b.val;},0);
+  document.getElementById('yr-lbl').textContent='anno '+CY;
+  var sv=document.getElementById('yr-saldo');
+  sv.textContent=fmt(ySaldo);sv.className='saldo-num '+(ySaldo>=0?'pos':'neg');
+  document.getElementById('yr-in').textContent=fmt(yIn);
+  document.getElementById('yr-out').textContent=fmt(yOut);
+  document.getElementById('yr-inv').textContent=fmt(yInv);
+  document.getElementById('yr-bp').textContent=yBp.length+' — '+fmt(yBpTot);
+  var wrap=document.getElementById('yr-months');
+  var rows=[];
+  for(var m=0;m<=CM;m++){
+    var mt=yTx.filter(function(t){var d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===CY;});
+    var mIn=mt.filter(function(t){return t.type==='in';}).reduce(function(s,t){return s+t.amt;},0);
+    var mOut=mt.filter(function(t){return t.type==='out';}).reduce(function(s,t){return s+t.amt;},0);
+    var mInv=mt.filter(function(t){return t.type==='inv';}).reduce(function(s,t){return s+t.amt;},0);
+    var mS=mIn-mOut-mInv;
+    if(mIn===0&&mOut===0&&mInv===0)continue;
+    rows.push('<div class="tx" style="flex-wrap:wrap;gap:6px 10px"><div class="txb" style="min-width:60px;flex:0 0 auto"><div class="txn">'+MESI3[m]+'</div></div><span style="font-size:11px;color:var(--tx3)"><span style="color:var(--grn)">+'+fmt(mIn)+'</span> <span style="color:var(--red)">-'+fmt(mOut)+'</span>'+(mInv?' <span style="color:var(--pur)">'+fmt(mInv)+'</span>':'')+'</span><span class="txa '+(mS>=0?'in':'out')+'" style="margin-left:auto">'+fmt(mS)+'</span></div>');
+  }
+  wrap.innerHTML=rows.length?rows.join(''):'<div class="empty-msg">nessun dato per quest\'anno</div>';
+}
+
+renderHome();
+
+function renderDati(){
+  document.getElementById('exp-tx-count').textContent=txs.length+' transazioni salvate';
+  document.getElementById('exp-bp-count').textContent=bps.length+' buoni salvati';
+}
+
+function downloadFile(name,content){
+  var blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function exportCSV(type){
+  var lines=[];
+  var d=today().replace(/-/g,'');
+  if(type==='tx'||type==='all'){
+    lines.push('tipo,sezione,descrizione,importo,data,categoria');
+    txs.forEach(function(t){
+      lines.push('transazione,'+t.type+',"'+t.desc.replace(/"/g,'""')+'",'+t.amt.toFixed(2)+','+t.date+','+t.cat);
+    });
+  }
+  if(type==='all'&&txs.length&&bps.length)lines.push('');
+  if(type==='bp'||type==='all'){
+    if(type==='bp')lines.push('tipo,sezione,descrizione,importo,data,categoria');
+    bps.forEach(function(b){
+      lines.push('buono_pasto,bp,"'+b.desc.replace(/"/g,'""')+'",'+b.val.toFixed(2)+','+b.date+',buono pasto');
+    });
+  }
+  var fname=type==='tx'?'transazioni_'+d+'.csv':type==='bp'?'buoni_pasto_'+d+'.csv':'budget_completo_'+d+'.csv';
+  downloadFile(fname,lines.join('\n'));
+}
+
+function importCSV(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result.replace(/^\uFEFF/,'');
+    var rows=text.split('\n').filter(function(r){return r.trim()&&!r.startsWith('tipo,');});
+    var addedTx=0,addedBp=0;
+    rows.forEach(function(row){
+      var parts=[];var inQuote=false,cur='';
+      for(var i=0;i<row.length;i++){
+        var c=row[i];
+        if(c==='"'){inQuote=!inQuote;}
+        else if(c===','&&!inQuote){parts.push(cur.trim());cur='';}
+        else{cur+=c;}
+      }
+      parts.push(cur.trim());
+      if(parts.length<5)return;
+      var tipo=parts[0],sez=parts[1],desc=parts[2],amt=parseFloat(parts[3]),date=parts[4],cat=parts[5]||'Altro';
+      if(isNaN(amt)||!date)return;
+      if(tipo==='buono_pasto'){
+        bps.push({id:Date.now()+Math.random()*1000,desc:desc,date:date,val:amt});addedBp++;
+      }else if(tipo==='transazione'){
+        txs.push({id:Date.now()+Math.random()*1000,desc:desc,amt:amt,date:date,cat:cat,type:sez});addedTx++;
+      }
+    });
+    localStorage.setItem('bgt_tx',JSON.stringify(txs));
+    localStorage.setItem('bgt_bp',JSON.stringify(bps));
+    document.getElementById('imp-status').innerHTML='<div class="exp-ok">importati '+addedTx+' transazioni e '+addedBp+' buoni</div>';
+    renderDati();input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function clearAll(){
+  if(!confirm('Sei sicuro? Tutti i dati verranno cancellati.'))return;
+  if(!confirm('Ultima conferma: vuoi davvero cancellare tutto?'))return;
+  txs=[];bps=[];
+  localStorage.removeItem('bgt_tx');localStorage.removeItem('bgt_bp');
+  renderDati();renderHome();
+  alert('Tutti i dati sono stati cancellati.');
+}
+</script>
+</body>
+</html>
