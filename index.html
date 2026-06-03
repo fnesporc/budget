@@ -80,11 +80,6 @@ body{font-family:var(--sans);padding:env(safe-area-inset-top) 0 0 0}
 .card-v{font-family:var(--mono);font-size:17px;font-weight:500}
 .card-v.g{color:var(--grn)}.card-v.r{color:var(--red)}.card-v.p{color:var(--pur)}.card-v.b{color:var(--blu)}
 
-/* Risparmio card */
-.risp-card{background:var(--surf);border-radius:var(--r);padding:.875rem 1.125rem;box-shadow:var(--shadow);border:.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
-.risp-card .card-l{margin:0}
-.risp-card .card-v{font-size:17px}
-
 /* Divider */
 .divider{height:0;border:none;border-top:.5px solid var(--bd);margin:1.25rem 0}
 
@@ -149,6 +144,29 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .bar-fill.out{background:var(--red)}.bar-fill.in{background:var(--grn)}.bar-fill.inv{background:var(--pur)}
 .bar-num{font-family:var(--mono);font-size:11px;font-weight:400;min-width:56px;text-align:right;color:var(--tx3)}
 
+/* Year flow chart */
+.flow-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:.5px solid var(--bd)}
+.flow-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.flow-month{font-size:12px;font-weight:600;color:var(--tx);width:36px;flex-shrink:0;text-transform:capitalize}
+.flow-bars{flex:1;display:flex;flex-direction:column;gap:3px}
+.flow-line{display:flex;align-items:center;gap:6px}
+.flow-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.flow-dot.in{background:var(--grn)}.flow-dot.out{background:var(--red)}.flow-dot.inv{background:var(--pur)}
+.flow-track{flex:1;background:var(--bg2);border-radius:3px;height:8px;overflow:hidden}
+.flow-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+.flow-fill.in{background:var(--grn)}.flow-fill.out{background:var(--red)}.flow-fill.inv{background:var(--pur)}
+.flow-amt{font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:48px;text-align:right}
+.net-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.net-lbl{font-size:12px;font-weight:600;color:var(--tx);width:36px;flex-shrink:0;text-transform:capitalize}
+.net-bar-wrap{flex:1;display:flex;align-items:center;height:22px;position:relative}
+.net-bar{height:14px;border-radius:4px;transition:width .5s cubic-bezier(.22,1,.36,1);min-width:3px}
+.net-bar.pos{background:var(--grn)}.net-bar.neg{background:var(--red)}
+.net-val{font-family:var(--mono);font-size:11px;font-weight:500;min-width:60px;text-align:right}
+.net-val.pos{color:var(--grn)}.net-val.neg{color:var(--red)}
+.legend{display:flex;gap:14px;margin-bottom:1rem}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx3)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
 /* Scope toggle */
 .toggle-scope{display:flex;gap:0;margin-bottom:1rem;background:var(--bg2);border-radius:var(--rs);padding:3px;overflow:hidden}
 .scope-btn{flex:1;padding:8px;font-size:12px;background:transparent;border:none;color:var(--tx3);cursor:pointer;font-weight:500;-webkit-appearance:none;border-radius:8px;transition:all .2s;font-family:var(--sans)}
@@ -205,10 +223,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="card"><div class="card-l">Investito</div><div class="card-v p" id="tot-inv">€0,00</div></div>
         <div class="card"><div class="card-l">Buoni usati</div><div class="card-v b" id="tot-bp">0</div></div>
       </div>
-      <div class="risp-card">
-        <div class="card-l">Risparmio netto</div>
-        <div class="card-v" id="tot-risp" style="font-size:17px">€0,00</div>
-      </div>
       <div class="divider"></div>
       <div class="sl">Recenti</div>
       <div class="tx-list" id="tx-list"></div>
@@ -236,14 +250,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <button class="scope-btn on" id="sc-mese" onclick="setScope('mese')">Mese</button>
         <button class="scope-btn" id="sc-anno" onclick="setScope('anno')">Anno</button>
       </div>
-      <div class="sl">Uscite per categoria</div>
-      <div id="ch-out" style="margin-bottom:1.25rem"></div>
-      <div class="sl">Entrate per categoria</div>
-      <div id="ch-in" style="margin-bottom:1.25rem"></div>
-      <div class="sl">Investimenti per categoria</div>
-      <div id="ch-inv" style="margin-bottom:1.25rem"></div>
-      <div class="sl">Andamento 6 mesi</div>
-      <div id="ch-monthly"></div>
+      <!-- MESE: dove vanno i soldi questo mese -->
+      <div id="view-mese">
+        <div class="sl">Uscite per categoria</div>
+        <div id="ch-out" style="margin-bottom:1.25rem"></div>
+        <div class="sl">Entrate per categoria</div>
+        <div id="ch-in" style="margin-bottom:1.25rem"></div>
+        <div class="sl">Investimenti per categoria</div>
+        <div id="ch-inv" style="margin-bottom:1.25rem"></div>
+      </div>
+      <!-- ANNO: come vanno i mesi -->
+      <div id="view-anno" style="display:none">
+        <div class="sl">Flussi mensili</div>
+        <div id="ch-year-flow" style="margin-bottom:1.5rem"></div>
+        <div class="sl">Saldo netto per mese</div>
+        <div id="ch-year-net"></div>
+      </div>
     </div>
 
     <!-- ANNO -->
@@ -257,10 +279,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="yr-card"><div class="yr-l">Uscite</div><div class="yr-v r" id="yr-out">€0,00</div></div>
         <div class="yr-card"><div class="yr-l">Investito</div><div class="yr-v p" id="yr-inv">€0,00</div></div>
         <div class="yr-card"><div class="yr-l">Buoni usati</div><div class="yr-v b" id="yr-bp">0 — €0,00</div></div>
-      </div>
-      <div class="risp-card" style="margin-top:10px">
-        <div class="card-l">Risparmio netto annuale</div>
-        <div class="card-v" id="yr-risp" style="font-size:17px">€0,00</div>
       </div>
       <div class="divider"></div>
       <div class="sl">Riepilogo per mese</div>
@@ -277,10 +295,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         </div>
         <div class="bp-right">
           <span class="bpr-lbl">Valore (€)</span>
-          <input type="number" id="bp-val" value="7" min="1" step="0.5">
+          <input type="number" id="bp-val" value="8" min="1" step="0.5">
         </div>
       </div>
-      <div class="fg"><label class="fl">Dove hai usato il buono</label><input type="text" id="bp-desc" placeholder="es. Mensa aziendale"></div>
+      <div class="fg"><label class="fl">Dove hai usato il buono <span style="color:var(--tx4)">(facoltativo)</span></label><input type="text" id="bp-desc" placeholder="es. Mensa aziendale"></div>
       <div class="fg"><label class="fl">Data</label><input type="date" id="bp-date"></div>
       <button class="go-btn" style="background:var(--grn)" onclick="saveBp()">Registra buono pasto</button>
       <div class="divider"></div>
@@ -396,6 +414,8 @@ function setScope(s){
   chartScope=s;
   document.getElementById('sc-mese').classList.toggle('on',s==='mese');
   document.getElementById('sc-anno').classList.toggle('on',s==='anno');
+  document.getElementById('view-mese').style.display=s==='mese'?'block':'none';
+  document.getElementById('view-anno').style.display=s==='anno'?'block':'none';
   renderCharts();
 }
 
@@ -427,9 +447,6 @@ function renderHome(){
   document.getElementById('tot-out').textContent=fmt(tOut);
   document.getElementById('tot-inv').textContent=fmt(tInv);
   document.getElementById('tot-bp').textContent=mBp.length;
-  var risp=tIn-tOut-tInv;
-  var rispEl=document.getElementById('tot-risp');
-  rispEl.textContent=fmt(risp);rispEl.className='card-v '+(risp>=0?'g':'r');
   var sv=document.getElementById('saldo-v');
   sv.textContent=fmt(saldo);sv.className='saldo-num '+(saldo>=0?'pos':'neg');
   var list=document.getElementById('tx-list');
@@ -441,8 +458,9 @@ function renderHome(){
 function saveBp(){
   var desc=document.getElementById('bp-desc').value.trim();
   var date=document.getElementById('bp-date').value;
-  var val=parseFloat(document.getElementById('bp-val').value)||7;
-  if(!desc||!date){alert('Compila tutti i campi.');return}
+  var val=parseFloat(document.getElementById('bp-val').value)||8;
+  if(!date){alert('Inserisci la data.');return}
+  if(!desc)desc='Buono pasto';
   bps.unshift({id:Date.now(),desc:desc,date:date,val:val});
   localStorage.setItem('bgt_bp',JSON.stringify(bps));
   document.getElementById('bp-desc').value='';
@@ -471,21 +489,50 @@ function buildBar(el,type,list){
 }
 
 function renderCharts(){
-  var pool=chartScope==='anno'?filterYear(txs):filterMonth(txs);
-  buildBar(document.getElementById('ch-out'),'out',pool);
-  buildBar(document.getElementById('ch-in'),'in',pool);
-  buildBar(document.getElementById('ch-inv'),'inv',pool);
-  var monthly=document.getElementById('ch-monthly');
-  var last6=[];
-  for(var i=5;i>=0;i--){
-    var d=new Date(CY,CM-i,1);
-    var mm=d.getMonth(),yy=d.getFullYear();
-    var mt=txs.filter(function(t){var td=new Date(t.date);return td.getMonth()===mm&&td.getFullYear()===yy});
-    last6.push({mn:MESI3[mm>=0?mm:mm+12],out:mt.filter(function(t){return t.type==='out'}).reduce(function(s,t){return s+t.amt},0),inp:mt.filter(function(t){return t.type==='in'}).reduce(function(s,t){return s+t.amt},0),inv:mt.filter(function(t){return t.type==='inv'}).reduce(function(s,t){return s+t.amt},0)});
+  if(chartScope==='mese'){
+    var pool=filterMonth(txs);
+    buildBar(document.getElementById('ch-out'),'out',pool);
+    buildBar(document.getElementById('ch-in'),'in',pool);
+    buildBar(document.getElementById('ch-inv'),'inv',pool);
+  }else{
+    // Year view: month-by-month flow breakdown + net saldo bars
+    var months=[];
+    for(var m=0;m<=CM;m++){
+      var mt=txs.filter(function(t){var d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===CY});
+      var inp=mt.filter(function(t){return t.type==='in'}).reduce(function(s,t){return s+t.amt},0);
+      var out=mt.filter(function(t){return t.type==='out'}).reduce(function(s,t){return s+t.amt},0);
+      var inv=mt.filter(function(t){return t.type==='inv'}).reduce(function(s,t){return s+t.amt},0);
+      months.push({mn:MESI3[m],inp:inp,out:out,inv:inv,net:inp-out-inv});
+    }
+    var maxFlow=Math.max.apply(null,months.map(function(x){return Math.max(x.inp,x.out,x.inv)}));
+    if(maxFlow<1)maxFlow=1;
+    var flowEl=document.getElementById('ch-year-flow');
+    if(!months.length||months.every(function(x){return x.inp===0&&x.out===0&&x.inv===0})){
+      flowEl.innerHTML='<div class="empty-msg">Nessun dato</div>';
+    }else{
+      flowEl.innerHTML='<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:var(--grn)"></div>Entrate</div><div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Uscite</div><div class="legend-item"><div class="legend-dot" style="background:var(--pur)"></div>Investimenti</div></div>'+
+        months.filter(function(x){return x.inp>0||x.out>0||x.inv>0}).map(function(x){
+        return '<div class="flow-row">'+
+          '<span class="flow-month">'+x.mn+'</span>'+
+          '<div class="flow-bars">'+
+            (x.inp>0?'<div class="flow-line"><div class="flow-dot in"></div><div class="flow-track"><div class="flow-fill in" style="width:'+Math.round(x.inp/maxFlow*100)+'%"></div></div><span class="flow-amt">'+fmt(x.inp)+'</span></div>':'')+
+            (x.out>0?'<div class="flow-line"><div class="flow-dot out"></div><div class="flow-track"><div class="flow-fill out" style="width:'+Math.round(x.out/maxFlow*100)+'%"></div></div><span class="flow-amt">'+fmt(x.out)+'</span></div>':'')+
+            (x.inv>0?'<div class="flow-line"><div class="flow-dot inv"></div><div class="flow-track"><div class="flow-fill inv" style="width:'+Math.round(x.inv/maxFlow*100)+'%"></div></div><span class="flow-amt">'+fmt(x.inv)+'</span></div>':'')+
+          '</div></div>'
+      }).join('');
+    }
+    // Net saldo bars
+    var netEl=document.getElementById('ch-year-net');
+    var activeMonths=months.filter(function(x){return x.inp>0||x.out>0||x.inv>0});
+    if(!activeMonths.length){netEl.innerHTML='<div class="empty-msg">Nessun dato</div>';return}
+    var maxAbs=Math.max.apply(null,activeMonths.map(function(x){return Math.abs(x.net)}));
+    if(maxAbs<1)maxAbs=1;
+    netEl.innerHTML=activeMonths.map(function(x){
+      var pct=Math.max(4,Math.round(Math.abs(x.net)/maxAbs*100));
+      var cls=x.net>=0?'pos':'neg';
+      return '<div class="net-row"><span class="net-lbl">'+x.mn+'</span><div class="net-bar-wrap"><div class="net-bar '+cls+'" style="width:'+pct+'%"></div></div><span class="net-val '+cls+'">'+fmt(x.net)+'</span></div>'
+    }).join('');
   }
-  var maxV=Math.max.apply(null,last6.map(function(x){return Math.max(x.out,x.inp,x.inv)}));
-  if(maxV<1)maxV=1;
-  monthly.innerHTML=last6.map(function(x){return '<div class="bar-row" style="align-items:flex-start"><span class="bar-lbl" style="padding-top:2px">'+x.mn+'</span><div style="flex:1;display:flex;flex-direction:column;gap:3px"><div class="bar-track" style="height:8px"><div class="bar-fill in" style="width:'+Math.round(x.inp/maxV*100)+'%"></div></div><div class="bar-track" style="height:8px"><div class="bar-fill out" style="width:'+Math.round(x.out/maxV*100)+'%"></div></div><div class="bar-track" style="height:8px"><div class="bar-fill inv" style="width:'+Math.round(x.inv/maxV*100)+'%"></div></div></div><span class="bar-num">'+fmt(x.inp-x.out-x.inv)+'</span></div>'}).join('');
 }
 
 function renderYear(){
@@ -502,8 +549,6 @@ function renderYear(){
   document.getElementById('yr-out').textContent=fmt(yOut);
   document.getElementById('yr-inv').textContent=fmt(yInv);
   document.getElementById('yr-bp').textContent=yBp.length+' — '+fmt(yBpTot);
-  var yrRisp=document.getElementById('yr-risp');
-  yrRisp.textContent=fmt(ySaldo);yrRisp.className='card-v '+(ySaldo>=0?'g':'r');
   var wrap=document.getElementById('yr-months');
   var rows=[];
   for(var m=0;m<=CM;m++){
