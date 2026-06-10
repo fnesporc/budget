@@ -145,8 +145,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 .amt-hero{text-align:center;padding:.6rem 0 1.3rem}
 .amt-input-wrap{display:flex;align-items:baseline;justify-content:center;gap:5px}
 .amt-euro{font-size:30px;color:var(--tx4);font-weight:600}
-.amt-input{font-size:52px;font-weight:700;color:var(--tx);background:none;border:none;outline:none;width:auto;max-width:230px;text-align:center;padding:0;caret-color:var(--tint);-webkit-appearance:none;font-family:inherit;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.amt-input{font-size:52px;font-weight:700;color:var(--tx);background:none;border:none;outline:none;box-shadow:none;width:auto;max-width:230px;text-align:center;padding:0;caret-color:var(--tint);-webkit-appearance:none;font-family:inherit;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.amt-input:focus{outline:none;box-shadow:none;border:none}
 .amt-input::placeholder{color:var(--tx4)}
+/* Hide number spinners everywhere */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
 
 /* Glass segmented control */
 .seg,.toggle-scope{display:flex;background:rgba(120,120,128,.14);border-radius:14px;padding:2.5px;margin-bottom:1.3rem;position:relative}
@@ -182,7 +187,7 @@ input[type=text],input[type=number]:not(.amt-input),input[type=date],select{
   font-family:inherit;
   box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 rgba(255,255,255,.5)}
 @media(prefers-color-scheme:dark){input[type=text],input[type=number]:not(.amt-input),input[type=date],select{box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 rgba(255,255,255,.07)}}
-input:focus,select:focus{outline:none;box-shadow:0 0 0 2.5px var(--tint)}
+input:focus,select:focus{outline:none}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='%238E8E93'%3E%3Cpath d='M2.5 5l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
 
 /* Recurring cell */
