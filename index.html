@@ -839,7 +839,8 @@ var GIORNI=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','
 var txType='out',chartScope='mese',selCat=CATS.out[0];
 var THEME=localStorage.getItem('bgt_theme')||'auto';
 var ACCENT=localStorage.getItem('bgt_accent')||'';
-var ACCENTS=['#007AFF','#5856D6','#AF52DE','#FF2D55','#FF3B30','#FF9500','#34C759','#30B0C7'];
+/* Tinte visibili sia in chiaro che in scuro (niente gialli chiari o grigi troppo scuri) */
+var ACCENTS=['#007AFF','#32ADE6','#30B0C7','#00C7BE','#34C759','#FF9500','#FF3B30','#FF2D55','#AF52DE','#5856D6','#A2845E','#8E8E93'];
 var txs=JSON.parse(localStorage.getItem('bgt_tx')||'[]');
 var bps=JSON.parse(localStorage.getItem('bgt_bp')||'[]');
 var recs=JSON.parse(localStorage.getItem('bgt_rec')||'[]');
