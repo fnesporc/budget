@@ -290,6 +290,10 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .seg-btn.on,.scope-btn.on{background:var(--glass-strong);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   box-shadow:0 2px 8px rgba(0,0,0,.12), inset 0 0 0 .5px var(--glass-edge), inset 0 1px 0 var(--ins-hl);font-weight:600}
+/* Pillola colorata per tipo nella schermata Nuovo */
+.seg.t-out .seg-btn.on{background:var(--red);color:#fff}
+.seg.t-in .seg-btn.on{background:var(--grn);color:#fff}
+.seg.t-inv .seg-btn.on{background:var(--pur);color:#fff}
 
 /* Glass chips */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.3rem}
@@ -298,8 +302,11 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
   font-size:14px;cursor:pointer;color:var(--tx);transition:all .2s;font-weight:400;-webkit-appearance:none;font-family:inherit;
   box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
+.chip{display:inline-flex;align-items:center;gap:6px}
+.chip svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.7;flex-shrink:0}
+.chip.sel svg{opacity:1}
 .chip.sel{background:var(--tint);color:#fff;font-weight:500;
-  box-shadow:0 4px 14px var(--tint-glow), inset 0 1px 0 rgba(255,255,255,.35)}
+  box-shadow:0 4px 14px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.35)}
 .chip:active{transform:scale(.96)}
 .chip-add{color:var(--tint);font-weight:500}
 .chip-del{color:var(--red);font-weight:500}
@@ -1018,16 +1025,24 @@ function startEdit(id){
 function setT(t){
   txType=t;
   ['out','in','inv'].forEach(function(x){document.getElementById('pill-'+x).className='seg-btn'+(t===x?' on':'')});
+  document.querySelector('#pg-add .seg').className='seg t-'+t;
+  var amt=document.getElementById('f-amt');
+  amt.style.color=TYPE_COLOR[t];amt.style.caretColor=TYPE_COLOR[t];
   selCat=CATS[t][0];
   renderChips();
 }
 var catEdit=false;
 function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function chipIcon(c){
+  var g=CAT_ICONS[c]||CAT_ICONS.Altro;
+  return '<svg viewBox="0 0 24 24">'+g.replace(/fill="#fff"/g,'fill="currentColor" stroke="none"')+'</svg>';
+}
 function renderChips(){
   var parts=CATS[txType].map(function(c){
     var d=' data-cat="'+escAttr(c)+'"';
     if(catEdit)return '<button class="chip chip-del" data-act="del"'+d+'>✕ '+escAttr(c)+'</button>';
-    return '<button class="chip'+(c===selCat?' sel':'')+'" data-act="pick"'+d+'>'+escAttr(c)+'</button>';
+    var sel=c===selCat;
+    return '<button class="chip'+(sel?' sel':'')+'" data-act="pick"'+d+(sel?' style="background:'+TYPE_COLOR[txType]+'"':'')+'>'+chipIcon(c)+escAttr(c)+'</button>';
   });
   if(!catEdit)parts.push('<button class="chip chip-add" data-act="add">+ Nuova</button>');
   document.getElementById('cat-chips').innerHTML=parts.join('');
