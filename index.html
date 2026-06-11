@@ -76,11 +76,10 @@ html[data-theme="dark"]{
   --seg-bg:rgba(120,120,128,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--bg-grad) var(--bg);background-attachment:fixed;color:var(--tx);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-body{position:fixed;inset:0;width:100%}
+html,body{min-height:100%;background:var(--bg-grad) var(--bg);background-attachment:fixed;color:var(--tx);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg-grad);background-attachment:fixed}
 
-.app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+.app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
 
 /* ============ Liquid Glass header ============ */
 .hdr{position:sticky;top:0;z-index:9;
@@ -102,7 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 .hdr-saldo.pos{color:var(--grn)}.hdr-saldo.neg{color:var(--red)}
 
 /* ============ Layout ============ */
-.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:130px}
+.content{flex:1;padding-bottom:130px}
 .page{display:none;padding:1rem 1.15rem 2rem}
 .page.on{display:block;animation:fadeIn .25s cubic-bezier(.2,.8,.3,1)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px) scale(.995)}to{opacity:1;transform:none}}
@@ -948,7 +947,7 @@ var contentEl=document.querySelector('.content');
 var hdrEl=document.querySelector('.hdr'),hdrSaldoEl=document.getElementById('hdr-saldo'),hdrMEl=document.getElementById('hdr-m'),pgHomeEl=document.getElementById('pg-home');
 var hdrMini=false,hdrShow=false;
 function onScroll(){
-  var sc=contentEl.scrollTop;
+  var sc=Math.max(window.scrollY||0,contentEl.scrollTop);
   var mini=sc>30;
   if(mini!==hdrMini){hdrMini=mini;hdrEl.classList.toggle('mini',mini)}
   var show=sc>140&&pgHomeEl.classList.contains('on');
@@ -959,6 +958,7 @@ function onScroll(){
   }
 }
 contentEl.addEventListener('scroll',onScroll,{passive:true});
+window.addEventListener('scroll',onScroll,{passive:true});
 /* iOS: alla chiusura della tastiera la finestra può restare scrollata e lasciare un vuoto sotto la nav */
 window.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0)},60)});
 function go(name){
@@ -966,7 +966,7 @@ function go(name){
     document.getElementById('pg-'+n).classList.toggle('on',n===name);
     document.getElementById('nb-'+n).classList.toggle('on',n===name);
   });
-  contentEl.scrollTop=0;
+  contentEl.scrollTop=0;window.scrollTo(0,0);
   hdrMini=false;hdrShow=false;
   hdrEl.classList.remove('mini');
   hdrSaldoEl.style.display='none';
