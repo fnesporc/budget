@@ -970,10 +970,9 @@ function go(name){
   hdrSaldoEl.style.display='none';
   hdrMEl.style.display='inline';
   document.getElementById('hdr-title').textContent=TITLES[name];
-  if(name==='home')renderHome();
-  if(name==='grafici')renderCharts();
-  if(name==='pasti')renderBp();
-  if(name==='dati')renderDati();
+  /* Render differito: il cambio tab viene dipinto subito, i dati arrivano al frame dopo */
+  var render={home:renderHome,grafici:renderCharts,pasti:renderBp,dati:renderDati}[name];
+  if(render)setTimeout(render,0);
 }
 
 /* ============ SWIPE PER ELIMINARE ============ */
