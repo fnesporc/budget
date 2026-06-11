@@ -80,7 +80,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);-webk
 body{position:fixed;inset:0;width:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg-grad);background-attachment:fixed}
 
-.app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative}
+.app{max-width:430px;margin:0 auto;height:var(--vh,100%);display:flex;flex-direction:column;position:relative}
 
 /* ============ Liquid Glass header ============ */
 .hdr{position:sticky;top:0;z-index:9;
@@ -961,6 +961,12 @@ function onScroll(){
 contentEl.addEventListener('scroll',onScroll,{passive:true});
 /* iOS: alla chiusura della tastiera la finestra può restare scrollata e lasciare un vuoto sotto la nav */
 window.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0)},60)});
+/* iOS standalone: all'avvio la WebView può riportare un'altezza sbagliata — misura quella reale */
+function setVH(){document.documentElement.style.setProperty('--vh',window.innerHeight+'px')}
+setVH();
+window.addEventListener('resize',setVH);
+window.addEventListener('orientationchange',function(){setTimeout(setVH,100)});
+setTimeout(setVH,300);setTimeout(setVH,1000);
 function go(name){
   TABS.forEach(function(n){
     document.getElementById('pg-'+n).classList.toggle('on',n===name);
