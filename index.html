@@ -80,7 +80,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);-webk
 body{position:fixed;inset:0;width:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg-grad);background-attachment:fixed}
 
-.app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+.app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative}
 
 /* ============ Liquid Glass header ============ */
 .hdr{position:sticky;top:0;z-index:9;
@@ -108,7 +108,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px) scale(.995)}to{opacity:1;transform:none}}
 
 /* ============ iOS 26 floating Liquid Glass tab bar ============ */
-.nav{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 12px);left:0;right:0;z-index:10;
+.nav{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 12px);left:0;right:0;z-index:10;
   display:flex;justify-content:center;pointer-events:none;padding:0 16px}
 .nav-inner{display:flex;gap:0;pointer-events:auto;
   background:var(--glass);
@@ -959,6 +959,8 @@ function onScroll(){
   }
 }
 contentEl.addEventListener('scroll',onScroll,{passive:true});
+/* iOS: alla chiusura della tastiera la finestra può restare scrollata e lasciare un vuoto sotto la nav */
+window.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0)},60)});
 function go(name){
   TABS.forEach(function(n){
     document.getElementById('pg-'+n).classList.toggle('on',n===name);
