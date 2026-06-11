@@ -118,15 +118,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 .nav-btn span{position:relative}
 .nav-btn.on svg{stroke-width:2.1}
 
-/* ============ Hero saldo ============ */
-.saldo-block{padding:1.4rem 0 1.25rem;text-align:center}
+/* ============ Hero saldo (card) ============ */
+.saldo-block{padding:1.5rem 1rem 1.4rem;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;
+  background:var(--glass-strong);
+  backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
+  border-radius:var(--r);
+  box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
+.saldo-block:before{content:"";position:absolute;inset:0 0 auto 0;height:4px;
+  background:linear-gradient(90deg,transparent,var(--tint),transparent);opacity:.8}
 .saldo-lbl{font-size:13px;color:var(--tx3);margin-bottom:4px;font-weight:500}
 .saldo-num{font-size:44px;font-weight:700;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .saldo-num.pos{color:var(--grn)}.saldo-num.neg{color:var(--red)}
 .saldo-sub{font-size:13px;color:var(--tx3);margin-top:5px}
 
 /* ============ Allocation bar ============ */
-.budget-bar{margin:0 .15rem 1.3rem}
+.budget-bar{margin:0 0 14px;padding:.9rem 1.1rem;
+  background:var(--glass-strong);
+  backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
+  border-radius:var(--r);
+  box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
 .budget-track{height:8px;background:rgba(120,120,128,.14);border-radius:5px;overflow:hidden;display:flex}
 .budget-seg{height:100%;transition:width .7s cubic-bezier(.2,.8,.3,1)}
 .budget-legend{display:flex;justify-content:space-between;margin-top:9px}
@@ -139,11 +149,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
   backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
   border-radius:var(--r);padding:1rem 1.1rem;
   box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
-.card-l{font-size:12px;color:var(--tx3);margin-bottom:4px;font-weight:500}
+.card-l{font-size:12px;color:var(--tx3);margin-bottom:4px;font-weight:500;display:flex;align-items:center;gap:5px}
+.card-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .card-v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
 .card-v.g{color:var(--grn)}.card-v.r{color:var(--red)}.card-v.p{color:var(--pur)}.card-v.b{color:var(--blu)}
 
 .sl{color:var(--tx3);margin:0 .35rem .6rem;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.03em}
+
+/* ============ Proiezione card ============ */
+.proj-card{display:flex;align-items:center;gap:12px;padding:1rem 1.15rem;margin-bottom:1.5rem;
+  background:var(--glass-strong);
+  backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
+  border-radius:var(--r);
+  box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
+.proj-ic{width:38px;height:38px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--tint-soft)}
+.proj-ic svg{width:20px;height:20px;stroke:var(--tint);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.proj-b{flex:1;min-width:0}
+.proj-t{font-size:13px;font-weight:600;color:var(--tx)}
+.proj-s{font-size:12px;color:var(--tx3);margin-top:1px}
+.proj-v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.proj-v.pos{color:var(--grn)}.proj-v.neg{color:var(--red)}
 .sl-row{display:flex;justify-content:space-between;align-items:center}
 .sl-edit{background:none;border:none;color:var(--tint);font:inherit;font-size:13px;font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer;padding:2px 0}
 .sl-edit:active{opacity:.5}
@@ -378,10 +404,19 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
 
       <div class="cards">
-        <div class="card"><div class="card-l">Entrate</div><div class="card-v g" id="tot-in">€0,00</div></div>
-        <div class="card"><div class="card-l">Uscite</div><div class="card-v r" id="tot-out">€0,00</div></div>
-        <div class="card"><div class="card-l">Investito</div><div class="card-v p" id="tot-inv">€0,00</div></div>
-        <div class="card"><div class="card-l">Buoni pasto</div><div class="card-v b" id="tot-bp">0</div></div>
+        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--grn)"></span>Entrate</div><div class="card-v g" id="tot-in">€0,00</div></div>
+        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--red)"></span>Uscite</div><div class="card-v r" id="tot-out">€0,00</div></div>
+        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--pur)"></span>Investito</div><div class="card-v p" id="tot-inv">€0,00</div></div>
+        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--blu)"></span>Buoni pasto</div><div class="card-v b" id="tot-bp">0</div></div>
+      </div>
+
+      <div class="proj-card" id="proj-month" style="display:none">
+        <div class="proj-ic"><svg viewBox="0 0 24 24"><path d="M4 18L10 11l4 3.5L20 7"/><path d="M15.5 7H20v4.5"/></svg></div>
+        <div class="proj-b">
+          <div class="proj-t">Risparmio previsto a fine mese</div>
+          <div class="proj-s" id="proj-month-sub"></div>
+        </div>
+        <span class="proj-v" id="proj-month-v"></span>
       </div>
 
       <div class="sl">Recenti</div>
@@ -469,6 +504,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="yr-card"><div class="yr-l">Investito</div><div class="yr-v" style="color:var(--pur)" id="yr-inv">€0,00</div></div>
         <div class="yr-card"><div class="yr-l">Buoni pasto</div><div class="yr-v" style="color:var(--blu)" id="yr-bp">0 — €0,00</div></div>
       </div>
+
+      <div class="proj-card" id="proj-year" style="display:none">
+        <div class="proj-ic"><svg viewBox="0 0 24 24"><path d="M4 18L10 11l4 3.5L20 7"/><path d="M15.5 7H20v4.5"/></svg></div>
+        <div class="proj-b">
+          <div class="proj-t">Risparmio previsto a fine anno</div>
+          <div class="proj-s" id="proj-year-sub"></div>
+        </div>
+        <span class="proj-v" id="proj-year-v"></span>
+      </div>
+
       <div class="sl">Riepilogo per mese</div>
       <div class="group" id="yr-months"></div>
     </div>
@@ -790,6 +835,17 @@ function renderHome(){
     document.getElementById('bpct-inv').textContent=Math.round(pInv)+'%';
     document.getElementById('bpct-rest').textContent=Math.round(pRest)+'%';
   }else{bar.style.display='none'}
+  /* Proiezione fine mese: entrate/investimenti attuali, uscite proiettate al ritmo giornaliero */
+  var pj=document.getElementById('proj-month');
+  if(tIn>0||tOut>0||tInv>0){
+    var daysInMonth=new Date(CY,CM+1,0).getDate();
+    var dailyOut=tOut/CD;
+    var projSaldo=tIn-dailyOut*daysInMonth-tInv;
+    pj.style.display='flex';
+    var pv=document.getElementById('proj-month-v');
+    pv.textContent=fmt(projSaldo);pv.className='proj-v '+(projSaldo>=0?'pos':'neg');
+    document.getElementById('proj-month-sub').textContent='Spendi circa '+fmt(dailyOut)+' al giorno · mancano '+(daysInMonth-CD)+' giorni';
+  }else{pj.style.display='none'}
   var list=document.getElementById('tx-list');
   var rec=txs.slice(0,12);
   if(!rec.length){list.innerHTML='<div class="empty-msg">Nessuna transazione ancora.<br>Tocca Nuovo per iniziare.</div>';return}
@@ -933,6 +989,18 @@ function renderYear(){
   document.getElementById('yr-out').textContent=fmt(yOut);
   document.getElementById('yr-inv').textContent=fmt(yInv);
   document.getElementById('yr-bp').textContent=yBp.length+' — '+fmt(yBpTot);
+  /* Proiezione fine anno: saldo netto proiettato sul ritmo dei giorni trascorsi */
+  var pj=document.getElementById('proj-year');
+  if(yIn>0||yOut>0||yInv>0){
+    var start=new Date(CY,0,1);
+    var dayOfYear=Math.floor((now-start)/864e5)+1;
+    var daysTotal=(CY%4===0&&(CY%100!==0||CY%400===0))?366:365;
+    var projNet=ySaldo/dayOfYear*daysTotal;
+    pj.style.display='flex';
+    var pv=document.getElementById('proj-year-v');
+    pv.textContent=fmtK(projNet);pv.className='proj-v '+(projNet>=0?'pos':'neg');
+    document.getElementById('proj-year-sub').textContent='Al ritmo attuale, su '+daysTotal+' giorni';
+  }else{pj.style.display='none'}
   var wrap=document.getElementById('yr-months');
   var rows=[];
   for(var m=0;m<=CM;m++){
