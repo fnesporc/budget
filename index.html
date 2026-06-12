@@ -139,6 +139,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
   border-radius:var(--r);
   box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
 #pg-home .saldo-block{cursor:pointer}
+#pg-home .card{cursor:pointer;transition:box-shadow .2s}
+#pg-home .card.sel-card{box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl), 0 0 0 2px var(--tint)}
 .flipping{animation:flipY .55s cubic-bezier(.35,.7,.4,1)}
 @keyframes flipY{0%{transform:perspective(700px) rotateY(0)}50%{transform:perspective(700px) rotateY(90deg)}100%{transform:perspective(700px) rotateY(0)}}
 .saldo-lbl{font-size:13px;color:var(--tx3);margin-bottom:4px;font-weight:500}
@@ -522,11 +524,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
 
       <div class="cards">
-        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--grn)"></span>Entrate</div><div class="card-v g" id="tot-in">€0,00</div></div>
-        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--red)"></span>Uscite</div><div class="card-v r" id="tot-out">€0,00</div></div>
-        <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--pur)"></span>Investito</div><div class="card-v p" id="tot-inv">€0,00</div></div>
+        <div class="card" id="card-in" onclick="toggleBreakdown('in')"><div class="card-l"><span class="card-dot" style="background:var(--grn)"></span>Entrate</div><div class="card-v g" id="tot-in">€0,00</div></div>
+        <div class="card" id="card-out" onclick="toggleBreakdown('out')"><div class="card-l"><span class="card-dot" style="background:var(--red)"></span>Uscite</div><div class="card-v r" id="tot-out">€0,00</div></div>
+        <div class="card" id="card-inv" onclick="toggleBreakdown('inv')"><div class="card-l"><span class="card-dot" style="background:var(--pur)"></span>Investito</div><div class="card-v p" id="tot-inv">€0,00</div></div>
         <div class="card"><div class="card-l"><span class="card-dot" style="background:var(--blu)"></span>Buoni pasto</div><div class="card-v b" id="tot-bp">0</div></div>
       </div>
+
+      <div class="rule-card" id="cat-breakdown" style="display:none"></div>
 
       <div class="proj-card" id="proj-month" style="display:none">
         <div class="proj-ic"><svg viewBox="0 0 24 24"><path d="M4 18L10 11l4 3.5L20 7"/><path d="M15.5 7H20v4.5"/></svg></div>
@@ -714,8 +718,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <div><label class="fl">Svago %</label><input type="number" id="rule-want" min="0" max="100" onchange="saveRule()"></div>
           <div><label class="fl">Risparmio %</label><input type="number" id="rule-save" min="0" max="100" onchange="saveRule()"></div>
         </div>
-        <div class="exp-title">Categorie necessità</div>
-        <div class="exp-sub">Tocca una categoria per spostarla tra necessità e svago</div>
+        <div class="exp-title">Classifica le categorie</div>
+        <div class="exp-sub">Tocca per cambiare: 🏠 necessità → 🎉 svago → 🐷 risparmio</div>
         <div class="chips" id="need-chips" style="margin-bottom:0"></div>
       </div>
 
@@ -804,10 +808,17 @@ var CATS=JSON.parse(localStorage.getItem('bgt_cats')||'null')||{
   inv:['PAC','ETF','Azioni','Obbligazioni','Crypto','Altro']
 };
 function saveCats(){localStorage.setItem('bgt_cats',JSON.stringify(CATS))}
-/* Regola 50/30/20: obiettivi % e categorie classificate come necessità */
+/* Regola 50/30/20: obiettivi % e classificazione categorie in necessità/svago/risparmio */
 var RULE=JSON.parse(localStorage.getItem('bgt_rule')||'null')||{need:50,want:30,save:20};
-var NEEDCATS=JSON.parse(localStorage.getItem('bgt_needcats')||'null')||['Spesa','Trasporti','Salute'];
-function isNeed(cat){return NEEDCATS.indexOf(cat)>=0}
+var CATCLASS=JSON.parse(localStorage.getItem('bgt_catclass')||'null');
+if(!CATCLASS){
+  CATCLASS={};
+  var _oldNeed=JSON.parse(localStorage.getItem('bgt_needcats')||'null')||['Spesa','Trasporti','Salute'];
+  CATS.out.forEach(function(c){CATCLASS[c]=_oldNeed.indexOf(c)>=0?'need':'want'});
+}
+function catClass(c){return CATCLASS[c]||'want'}
+function saveCatClass(){localStorage.setItem('bgt_catclass',JSON.stringify(CATCLASS))}
+var CLASS_META={need:['🏠','Necessità'],want:['🎉','Svago'],save:['🐷','Risparmio']};
 /* Glifi per categoria; il colore dell'icona segue il tipo (uscita/entrata/investimento/buono) */
 var CAT_ICONS={
   Spesa:'<path d="M5 7h14l-1.5 11h-11z"/><path d="M8.5 7a3.5 3.5 0 017 0"/>',
@@ -1083,7 +1094,7 @@ document.getElementById('cat-chips').addEventListener('click',function(e){
 });
 document.getElementById('need-chips').addEventListener('click',function(e){
   var b=e.target.closest('button');
-  if(b&&b.dataset.need)toggleNeed(b.dataset.need);
+  if(b&&b.dataset.need)cycleClass(b.dataset.need);
 });
 setT('out');
 
@@ -1138,6 +1149,31 @@ function sum(arr,type){return arr.filter(function(t){return t.type===type}).redu
 
 /* ============ HOME ============ */
 var heroScope='mese';
+/* Breakdown per categoria al tap su Entrate/Uscite/Investito */
+var bdType=null;
+function toggleBreakdown(t){
+  bdType=bdType===t?null:t;
+  renderBreakdown();
+}
+function renderBreakdown(){
+  var el=document.getElementById('cat-breakdown');
+  ['in','out','inv'].forEach(function(x){
+    document.getElementById('card-'+x).classList.toggle('sel-card',bdType===x);
+  });
+  if(!bdType){el.style.display='none';return}
+  var pool=heroScope==='mese'?filterMonth(txs):filterYear(txs);
+  var data=catData(pool,bdType);
+  var titles={in:'Entrate',out:'Uscite',inv:'Investimenti'};
+  var title='<div class="rule-title">'+titles[bdType]+' per categoria · '+(heroScope==='mese'?MESI[CM]:CY)+'</div>';
+  el.style.display='block';
+  if(!data.length){el.innerHTML=title+'<div class="empty-msg" style="padding:.5rem 0 0">Nessun dato</div>';return}
+  var tot=data.reduce(function(s,d){return s+d.val},0),max=data[0].val;
+  el.innerHTML=title+data.map(function(d){
+    return '<div class="bar-row"><span class="bar-lbl">'+escAttr(d.name)+'</span>'+
+      '<div class="bar-track"><div class="bar-fill '+bdType+'" style="width:'+Math.max(4,Math.round(d.val/max*100))+'%"></div></div>'+
+      '<span class="bar-num" style="min-width:88px">'+fmt(d.val)+' · '+Math.round(d.val/tot*100)+'%</span></div>'
+  }).join('');
+}
 function flipHero(){
   heroScope=heroScope==='mese'?'anno':'mese';
   var els=[].slice.call(document.querySelectorAll('#pg-home .saldo-block,#pg-home .card'));
@@ -1179,6 +1215,7 @@ function renderHero(){
     document.getElementById('bpct-inv').textContent=Math.round(pInv)+'%';
     document.getElementById('bpct-rest').textContent=Math.round(pRest)+'%';
   }else{bar.style.display='none'}
+  renderBreakdown();
 }
 
 function renderHome(){
@@ -1199,9 +1236,9 @@ function renderHome(){
   /* Regola 50/30/20 a semaforo */
   var rc=document.getElementById('rule-card');
   if(tIn>0){
-    var needSum=mTx.filter(function(t){return t.type==='out'&&isNeed(t.cat)}).reduce(function(s,t){return s+t.amt},0);
-    var wantSum=tOut-needSum;
-    var saveSum=tIn-tOut;
+    var needSum=mTx.filter(function(t){return t.type==='out'&&catClass(t.cat)==='need'}).reduce(function(s,t){return s+t.amt},0);
+    var wantSum=mTx.filter(function(t){return t.type==='out'&&catClass(t.cat)==='want'}).reduce(function(s,t){return s+t.amt},0);
+    var saveSum=tIn-needSum-wantSum;
     function light(pct,target,higherIsBetter){
       if(higherIsBetter)return pct>=target?'var(--grn)':pct>=target-10?'var(--orange)':'var(--red)';
       return pct<=target?'var(--grn)':pct<=target+10?'var(--orange)':'var(--red)';
@@ -1307,7 +1344,7 @@ function checkAfford(){
     res.innerHTML='<div class="afford-line">Registra prima le entrate del mese per avere un verdetto sensato.</div>';
     return;
   }
-  var wantSpent=mTx.filter(function(t){return t.type==='out'&&!isNeed(t.cat)}).reduce(function(s,t){return s+t.amt},0);
+  var wantSpent=mTx.filter(function(t){return t.type==='out'&&catClass(t.cat)==='want'}).reduce(function(s,t){return s+t.amt},0);
   var wantBudget=tIn*RULE.want/100;
   var wantAfter=wantSpent+amt;
   var daysInMonth=new Date(CY,CM+1,0).getDate();
@@ -1529,10 +1566,10 @@ function saveRule(){
   localStorage.setItem('bgt_rule',JSON.stringify(RULE));
   renderDati();
 }
-function toggleNeed(c){
-  var i=NEEDCATS.indexOf(c);
-  if(i>=0)NEEDCATS.splice(i,1);else NEEDCATS.push(c);
-  localStorage.setItem('bgt_needcats',JSON.stringify(NEEDCATS));
+function cycleClass(c){
+  var order=['need','want','save'];
+  CATCLASS[c]=order[(order.indexOf(catClass(c))+1)%3];
+  saveCatClass();
   renderDati();
 }
 function setTheme(t){THEME=t;localStorage.setItem('bgt_theme',t);applyTheme();renderDati()}
@@ -1552,7 +1589,8 @@ function renderDati(){
   document.getElementById('rule-want').value=RULE.want;
   document.getElementById('rule-save').value=RULE.save;
   document.getElementById('need-chips').innerHTML=CATS.out.map(function(c){
-    return '<button class="chip'+(isNeed(c)?' sel':'')+'" data-need="'+escAttr(c)+'">'+(isNeed(c)?'🏠 ':'🎉 ')+escAttr(c)+'</button>'
+    var m=CLASS_META[catClass(c)];
+    return '<button class="chip" data-need="'+escAttr(c)+'">'+m[0]+' '+escAttr(c)+' <span style="color:var(--tx3);font-size:11px">'+m[1]+'</span></button>'
   }).join('');
   document.getElementById('goal-manage').innerHTML=goals.length?goals.map(function(g){
     return '<div class="srow"><div class="row"><span class="goal-emoji" style="font-size:20px">'+escAttr(g.emoji)+'</span>'+
