@@ -176,6 +176,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
   border-radius:var(--r);
   box-shadow:var(--shadow), inset 0 0 0 .75px var(--glass-edge), inset 0 1px 0 var(--ins-hl)}
 .rule-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* Controlli periodo del breakdown */
+.bd-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.bd-ctrl{display:flex;align-items:center;gap:5px}
+.bd-btn{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;
+  background:var(--seg-bg);color:var(--tx);font-size:16px;line-height:1;font-family:inherit;-webkit-appearance:none}
+.bd-btn:disabled{opacity:.3}
+.bd-btn:active:not(:disabled){transform:scale(.9)}
+.bd-lbl{border:none;cursor:pointer;font-family:inherit;-webkit-appearance:none;
+  background:var(--seg-bg);color:var(--tx);border-radius:13px;padding:5px 11px;
+  font-size:12px;font-weight:600;white-space:nowrap;text-transform:capitalize}
+.bd-lbl:active{opacity:.6}
 .rule-row{margin-bottom:10px}
 .rule-row:last-child{margin-bottom:0}
 .rule-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
@@ -1149,10 +1160,30 @@ function sum(arr,type){return arr.filter(function(t){return t.type===type}).redu
 
 /* ============ HOME ============ */
 var heroScope='mese';
-/* Breakdown per categoria al tap su Entrate/Uscite/Investito */
-var bdType=null;
+/* Breakdown per categoria al tap su Entrate/Uscite/Investito, con periodo navigabile */
+var bdType=null,bdScope='mese',bdY=CY,bdM=CM;
 function toggleBreakdown(t){
-  bdType=bdType===t?null:t;
+  if(bdType===t){bdType=null}
+  else{
+    if(bdType===null){bdScope='mese';bdY=CY;bdM=CM}
+    bdType=t;
+  }
+  renderBreakdown();
+}
+function bdToggleScope(){
+  bdScope=bdScope==='mese'?'anno':'mese';
+  if(bdScope==='mese'&&bdY===CY&&bdM>CM)bdM=CM;
+  renderBreakdown();
+}
+function bdShift(d){
+  if(bdScope==='anno'){bdY+=d}
+  else{
+    bdM+=d;
+    if(bdM<0){bdM=11;bdY--}
+    if(bdM>11){bdM=0;bdY++}
+  }
+  if(bdY>CY)bdY=CY;
+  if(bdScope==='mese'&&bdY===CY&&bdM>CM)bdM=CM;
   renderBreakdown();
 }
 function renderBreakdown(){
@@ -1161,14 +1192,24 @@ function renderBreakdown(){
     document.getElementById('card-'+x).classList.toggle('sel-card',bdType===x);
   });
   if(!bdType){el.style.display='none';return}
-  var pool=heroScope==='mese'?filterMonth(txs):filterYear(txs);
+  var pool=txs.filter(function(t){
+    var dt=new Date(t.date);
+    return bdScope==='mese'?(dt.getMonth()===bdM&&dt.getFullYear()===bdY):dt.getFullYear()===bdY;
+  });
   var data=catData(pool,bdType);
   var titles={in:'Entrate',out:'Uscite',inv:'Investimenti'};
-  var title='<div class="rule-title">'+titles[bdType]+' per categoria · '+(heroScope==='mese'?MESI[CM]:CY)+'</div>';
+  var lbl=bdScope==='mese'?MESI3[bdM]+' '+bdY:'Anno '+bdY;
+  var atEnd=bdScope==='anno'?bdY>=CY:(bdY===CY&&bdM>=CM);
+  var head='<div class="bd-head"><span class="rule-title" style="margin:0">'+titles[bdType]+'</span>'+
+    '<div class="bd-ctrl">'+
+    '<button class="bd-btn" onclick="bdShift(-1)" aria-label="Precedente">‹</button>'+
+    '<button class="bd-lbl" onclick="bdToggleScope()">'+lbl+' ⇄</button>'+
+    '<button class="bd-btn" onclick="bdShift(1)"'+(atEnd?' disabled':'')+' aria-label="Successivo">›</button>'+
+    '</div></div>';
   el.style.display='block';
-  if(!data.length){el.innerHTML=title+'<div class="empty-msg" style="padding:.5rem 0 0">Nessun dato</div>';return}
+  if(!data.length){el.innerHTML=head+'<div class="empty-msg" style="padding:.5rem 0 0">Nessun dato in questo periodo</div>';return}
   var tot=data.reduce(function(s,d){return s+d.val},0),max=data[0].val;
-  el.innerHTML=title+data.map(function(d){
+  el.innerHTML=head+data.map(function(d){
     return '<div class="bar-row"><span class="bar-lbl">'+escAttr(d.name)+'</span>'+
       '<div class="bar-track"><div class="bar-fill '+bdType+'" style="width:'+Math.max(4,Math.round(d.val/max*100))+'%"></div></div>'+
       '<span class="bar-num" style="min-width:88px">'+fmt(d.val)+' · '+Math.round(d.val/tot*100)+'%</span></div>'
